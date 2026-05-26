@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile detail</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Profile detail</p>
+        <h1 id="detailHeading">Profile information</h1>
+        <p id="detailDescription">View the full profile and matching connections for this tutor or student.</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="form-section detail-card" id="detailContent">
+        <div class="empty-state" id="detailMessage">Loading profile...</div>
+      </section>
+      <section class="preview-section match-section" id="matchSection" style="display: none;">
+        <div class="preview-header">
+          <h2 id="matchHeading">Matches</h2>
+          <p id="matchDescription">Profiles connected to this person.</p>
+        </div>
+        <div id="matchList" class="profile-grid"></div>
+      </section>
+      <div class="form-actions">
+        <a href="index.html" class="secondary profile-link">Back to directory</a>
+      </div>
+    </main>
+  </div>
+
+  <script src="detail.js"></script>
+</body>
+</html>

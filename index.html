@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutor & Student Matchmaker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <h1>Learning Matchmaker</h1>
+        <p>Tutors can list what they tutor, and students can save learning interests. The page then matches students with tutors who teach the same topics.</p>
+      </div>
+      <div class="hero-actions">
+        <button id="loginTutorButton" class="secondary">Tutor login</button>
+        <button id="loginStudentButton" class="secondary">Student login</button>
+        <button id="profileButton" class="secondary hidden">My profile</button>
+        <button id="logoutButton" class="secondary hidden">Logout</button>
+        <span id="loginStatus" class="login-status"></span>
+      </div>
+    </header>
+    <main>
+      <section class="preview-section">
+        <div class="preview-header">
+          <h2>All tutors</h2>
+          <p>Every tutor profile saved in this browser, shown in a full table.</p>
+        </div>
+        <div id="tutorTableWrapper" class="table-wrapper">
+          <table class="tutor-table" id="tutorTable">
+            <thead>
+              <tr>
+                <th>Photo</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Pronouns</th>
+                <th>Grade</th>
+                <th>School</th>
+                <th>Topics</th>
+                <th>Wage</th>
+                <th>Last Login</th>
+              </tr>
+            </thead>
+            <tbody id="tutorTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-overlay hidden" id="loginModal">
+    <div class="login-modal">
+      <button type="button" class="close-modal" id="closeLoginModal">×</button>
+      <h2 id="loginModalTitle">Log in</h2>
+      <p id="loginMessage" class="login-message"></p>
+      <form id="loginForm">
+        <input type="hidden" id="loginRole" name="role" value="tutor" />
+        <label>
+          Name
+          <input type="text" id="loginName" name="name" placeholder="Your name" required />
+        </label>
+        <label>
+          Email
+          <input type="email" id="loginEmail" name="email" placeholder="you@example.com" required />
+        </label>
+        <label>
+          Password
+          <input type="password" id="loginPassword" name="password" placeholder="Password" required />
+        </label>
+        <label class="confirm-password hidden" id="confirmPasswordWrapper">
+          Confirm password
+          <input type="password" id="loginConfirmPassword" name="confirmPassword" placeholder="Confirm password" />
+        </label>
+
+        <div id="tutorSignupFields" class="role-fields hidden">
+          <label>
+            Pronouns
+            <input type="text" id="loginTutorPronouns" name="pronouns" placeholder="She/Her, They/Them" />
+          </label>
+          <label>
+            Grade
+            <select id="loginTutorGrade" name="grade">
+              <option value="">Choose grade</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+              <option value="College">College</option>
+              <option value="Graduate">Graduate</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+          <label>
+            School
+            <input type="text" id="loginTutorSchool" name="school" placeholder="Lincoln High School" />
+          </label>
+          <fieldset class="topics-fieldset">
+            <legend>Topics you tutor</legend>
+            <label><input type="checkbox" value="Math" name="signupTopics" /> Math</label>
+            <label><input type="checkbox" value="Science" name="signupTopics" /> Science</label>
+            <label><input type="checkbox" value="English" name="signupTopics" /> English</label>
+            <label><input type="checkbox" value="History" name="signupTopics" /> History</label>
+            <label><input type="checkbox" value="Computer Science" name="signupTopics" /> Computer Science</label>
+            <label><input type="checkbox" value="Foreign Languages" name="signupTopics" /> Foreign Languages</label>
+            <label><input type="checkbox" value="Test Prep" name="signupTopics" /> Test Prep</label>
+          </fieldset>
+          <label>
+            Wage request
+            <input type="text" id="loginTutorWage" name="wage" placeholder="$25 / hour" />
+          </label>
+          <label>
+            Schedule
+            <input type="text" id="loginTutorSchedule" name="schedule" placeholder="Mon-Fri 4pm-8pm, Sat mornings" />
+          </label>
+          <label>
+            Information about me
+            <textarea id="loginTutorBio" name="bio" placeholder="Describe your teaching approach, subjects, and experience." rows="4"></textarea>
+          </label>
+          <label class="file-label">
+            Profile photo
+            <input type="file" id="loginPhoto" name="photo" accept="image/*" />
+          </label>
+        </div>
+
+        <div id="studentSignupFields" class="role-fields hidden">
+          <label>
+            Pronouns
+            <input type="text" id="loginStudentPronouns" name="pronouns" placeholder="They/Them, He/Him" />
+          </label>
+          <label>
+            Grade
+            <select id="loginStudentGrade" name="grade">
+              <option value="">Choose grade</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+              <option value="College">College</option>
+              <option value="Graduate">Graduate</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+          <label>
+            School
+            <input type="text" id="loginStudentSchool" name="school" placeholder="Riverside Middle School" />
+          </label>
+          <fieldset class="topics-fieldset">
+            <legend>Topics you want to learn</legend>
+            <label><input type="checkbox" value="Math" name="signupStudentTopics" /> Math</label>
+            <label><input type="checkbox" value="Science" name="signupStudentTopics" /> Science</label>
+            <label><input type="checkbox" value="English" name="signupStudentTopics" /> English</label>
+            <label><input type="checkbox" value="History" name="signupStudentTopics" /> History</label>
+            <label><input type="checkbox" value="Computer Science" name="signupStudentTopics" /> Computer Science</label>
+            <label><input type="checkbox" value="Foreign Languages" name="signupStudentTopics" /> Foreign Languages</label>
+            <label><input type="checkbox" value="Test Prep" name="signupStudentTopics" /> Test Prep</label>
+          </fieldset>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" id="loginSubmitButton">Sign in</button>
+        </div>
+      </form>
+      <p class="login-switch">
+        <span id="loginSwitchMessage">Don't have an account?</span>
+        <button type="button" id="toggleLoginMode" class="link-button">Sign up</button>
+      </p>
+    </div>
+  </div>
+
+  <div class="modal-overlay hidden" id="profileModal">
+    <div class="login-modal">
+      <button type="button" class="close-modal" id="closeProfileModal">×</button>
+      <h2 id="profileModalTitle">My profile</h2>
+      <p id="profileMessage" class="login-message"></p>
+      <form id="profileForm">
+        <label>
+          Name
+          <input type="text" id="profileName" name="name" placeholder="Your full name" required />
+        </label>
+        <label>
+          Email
+          <input type="email" id="profileEmail" name="email" disabled />
+        </label>
+
+        <label>
+          Pronouns
+          <input type="text" id="profilePronouns" name="pronouns" placeholder="She/Her, They/Them" />
+        </label>
+        <label>
+          Grade
+          <select id="profileGrade" name="grade">
+            <option value="">Choose grade</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+            <option value="College">College</option>
+            <option value="Graduate">Graduate</option>
+            <option value="Other">Other</option>
+          </select>
+        </label>
+        <label>
+          School
+          <input type="text" id="profileSchool" name="school" placeholder="Lincoln High School" />
+        </label>
+
+        <div id="profileTutorFields" class="role-fields hidden">
+          <fieldset class="topics-fieldset">
+            <legend>Topics you tutor</legend>
+            <label><input type="checkbox" value="Math" name="profileTopics" /> Math</label>
+            <label><input type="checkbox" value="Science" name="profileTopics" /> Science</label>
+            <label><input type="checkbox" value="English" name="profileTopics" /> English</label>
+            <label><input type="checkbox" value="History" name="profileTopics" /> History</label>
+            <label><input type="checkbox" value="Computer Science" name="profileTopics" /> Computer Science</label>
+            <label><input type="checkbox" value="Foreign Languages" name="profileTopics" /> Foreign Languages</label>
+            <label><input type="checkbox" value="Test Prep" name="profileTopics" /> Test Prep</label>
+          </fieldset>
+          <label>
+            Wage request
+            <input type="text" id="profileWage" name="wage" placeholder="$25 / hour" />
+          </label>
+          <label>
+            Schedule
+            <input type="text" id="profileTutorSchedule" name="schedule" placeholder="Mon-Fri 4pm-8pm, Sat mornings" />
+          </label>
+          <label>
+            Information about me
+            <textarea id="profileTutorBio" name="bio" placeholder="Describe your teaching approach, subjects, and experience." rows="4"></textarea>
+          </label>
+          <label class="file-label">
+            Profile photo
+            <input type="file" id="profilePhoto" name="photo" accept="image/*" />
+          </label>
+        </div>
+
+        <div id="profileStudentFields" class="role-fields hidden">
+          <fieldset class="topics-fieldset">
+            <legend>Topics you want to learn</legend>
+            <label><input type="checkbox" value="Math" name="profileStudentTopics" /> Math</label>
+            <label><input type="checkbox" value="Science" name="profileStudentTopics" /> Science</label>
+            <label><input type="checkbox" value="English" name="profileStudentTopics" /> English</label>
+            <label><input type="checkbox" value="History" name="profileStudentTopics" /> History</label>
+            <label><input type="checkbox" value="Computer Science" name="profileStudentTopics" /> Computer Science</label>
+            <label><input type="checkbox" value="Foreign Languages" name="profileStudentTopics" /> Foreign Languages</label>
+            <label><input type="checkbox" value="Test Prep" name="profileStudentTopics" /> Test Prep</label>
+          </fieldset>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" id="saveProfileButton">Save profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
