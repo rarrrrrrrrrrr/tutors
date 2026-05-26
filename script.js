@@ -13,6 +13,7 @@ const loginForm = document.getElementById('loginForm');
 const loginRoleInput = document.getElementById('loginRole');
 const loginModalTitle = document.getElementById('loginModalTitle');
 const loginNameInput = document.getElementById('loginName');
+const loginNameWrapper = document.getElementById('loginNameWrapper');
 const loginEmailInput = document.getElementById('loginEmail');
 const loginPasswordInput = document.getElementById('loginPassword');
 const loginConfirmPasswordInput = document.getElementById('loginConfirmPassword');
@@ -140,6 +141,10 @@ function setLoginMode(mode) {
     loginSwitchMessage.textContent = 'Already have an account?';
     loginModalTitle.textContent = loginRoleInput.value === 'tutor' ? 'Tutor sign up' : 'Student sign up';
     loginSubmitButton.textContent = 'Sign up';
+    loginNameInput.required = true;
+    if (loginNameWrapper) {
+      loginNameWrapper.classList.remove('hidden');
+    }
     loginConfirmPasswordInput.value = '';
     loginConfirmPasswordInput.required = true;
     document.getElementById('confirmPasswordWrapper').classList.remove('hidden');
@@ -148,6 +153,10 @@ function setLoginMode(mode) {
     loginSwitchMessage.textContent = 'Don\'t have an account?';
     loginModalTitle.textContent = loginRoleInput.value === 'tutor' ? 'Tutor login' : 'Student login';
     loginSubmitButton.textContent = 'Sign in';
+    loginNameInput.required = false;
+    if (loginNameWrapper) {
+      loginNameWrapper.classList.add('hidden');
+    }
     loginConfirmPasswordInput.required = false;
     document.getElementById('confirmPasswordWrapper').classList.add('hidden');
   }
@@ -166,9 +175,15 @@ function updateSignupFields() {
 
   Array.from(tutorSignupFields.querySelectorAll('input, select, textarea')).forEach(field => {
     field.disabled = !tutorVisible;
+    if (field.name === 'grade' || field.name === 'school') {
+      field.required = tutorVisible;
+    }
   });
   Array.from(studentSignupFields.querySelectorAll('input, select, textarea')).forEach(field => {
     field.disabled = !studentVisible;
+    if (field.name === 'grade' || field.name === 'school') {
+      field.required = studentVisible;
+    }
   });
 }
 
@@ -555,8 +570,8 @@ loginForm.addEventListener('submit', async function (event) {
   const email = formData.get('email').trim().toLowerCase();
   const password = formData.get('password');
 
-  if (!name || !email || !password) {
-    loginMessage.textContent = 'Please complete all sign-in fields.';
+  if ((loginMode === 'signup' && !name) || !email || !password) {
+    loginMessage.textContent = 'Please complete all required fields.';
     return;
   }
 
@@ -564,6 +579,13 @@ loginForm.addEventListener('submit', async function (event) {
     const confirmPassword = formData.get('confirmPassword');
     if (password !== confirmPassword) {
       loginMessage.textContent = 'Passwords do not match.';
+      return;
+    }
+
+    const grade = formData.get('grade');
+    const school = formData.get('school')?.trim();
+    if (!grade || !school) {
+      loginMessage.textContent = 'Please complete the profile fields for your selected role.';
       return;
     }
 
