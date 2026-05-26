@@ -283,25 +283,12 @@ function loadCurrentUserProfile() {
   renderTutorTable();
 }
 
-function formatLastLogin(isoString) {
-  if (!isoString) return 'Never';
-  const date = new Date(isoString);
-  if (isNaN(date.getTime())) return 'Never';
-  return date.toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit'
-  });
-}
-
 function renderTutorTable() {
   const tutors = loadProfiles(STORAGE_TUTORS);
   tutorTableBody.innerHTML = '';
 
   if (!tutors.length) {
-    tutorTableBody.innerHTML = '<tr><td colspan="9" class="empty-state">No tutor profiles saved yet. Any registered tutor can add a profile by logging in and saving their information.</td></tr>';
+    tutorTableBody.innerHTML = '<tr><td colspan="8" class="empty-state">No tutor profiles saved yet. Any registered tutor can add a profile by logging in and saving their information.</td></tr>';
     return;
   }
 
@@ -316,7 +303,6 @@ function renderTutorTable() {
       <td>${profile.school || ''}</td>
       <td>${Array.isArray(profile.topics) ? profile.topics.join(', ') : ''}</td>
       <td>${profile.wage || ''}</td>
-      <td>${formatLastLogin(profile.lastLoginAt)}</td>
     `;
     row.style.cursor = 'pointer';
     row.addEventListener('click', () => {
