@@ -44,94 +44,92 @@ const profilePhotoInput = document.getElementById('profilePhoto');
 const profileTutorFields = document.getElementById('profileTutorFields');
 const profileStudentFields = document.getElementById('profileStudentFields');
 
-const STORAGE_TUTORS = 'tutorProfiles';
-const STORAGE_STUDENTS = 'studentProfiles';
-const STORAGE_USERS = 'userAccounts';
+const STORAGE_TUTORS = 'tutor';
+const STORAGE_STUDENTS = 'student';
 const CURRENT_USER_KEY = 'currentUser';
+const API_BASE = '/api';
 let loginMode = 'login';
 
 function generateId(prefix) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-function loadProfiles(key) {
-  const raw = localStorage.getItem(key);
-  const profiles = raw ? JSON.parse(raw) : [];
-  let hasMissingId = false;
-
-  profiles.forEach(profile => {
-    if (!profile.id) {
-      profile.id = generateId(key === STORAGE_TUTORS ? 'tutor' : 'student');
-      hasMissingId = true;
-    }
+async function apiFetch(path, options = {}) {
+  const response = await fetch(`${API_BASE}${path}`, {
+    headers: { 'Content-Type': 'application/json' },
+    ...options,
   });
-
-  if (hasMissingId && profiles.length) {
-    saveProfiles(key, profiles);
+  if (!response.ok) {
+    let message = `Request failed (${response.status})`;
+    try {
+      const body = await response.json();
+      if (body && body.error) message = body.error;
+    } catch {}
+    const err = new Error(message);
+    err.status = response.status;
+    throw err;
   }
-
-  return profiles;
+  if (response.status === 204) return null;
+  return response.json();
 }
 
-function saveProfiles(key, profiles) {
-  localStorage.setItem(key, JSON.stringify(profiles));
+async function loadProfiles(key) {
+  const route = key === STORAGE_TUTORS ? 'tutors' : 'students';
+  try {
+    const profiles = await apiFetch(`/${route}`);
+    return Array.isArray(profiles) ? profiles : [];
+  } catch (err) {
+    console.error(`Failed to load ${route}:`, err);
+    return [];
+  }
+}
+
+async function upsertProfile(key, profile) {
+  const route = key === STORAGE_TUTORS ? 'tutors' : 'students';
+  return apiFetch(`/${route}`, {
+    method: 'POST',
+    body: JSON.stringify(profile),
+  });
 }
 
 function getCurrentUser() {
-  const raw = localStorage.getItem(CURRENT_USER_KEY);
+  const raw = sessionStorage.getItem(CURRENT_USER_KEY);
   return raw ? JSON.parse(raw) : null;
 }
 
 function setCurrentUser(user) {
-  localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+  sessionStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
   renderLoginState();
   loadCurrentUserProfile();
 }
 
 function clearCurrentUser() {
-  localStorage.removeItem(CURRENT_USER_KEY);
+  sessionStorage.removeItem(CURRENT_USER_KEY);
   loginMode = 'login';
   renderLoginState();
   loadCurrentUserProfile();
 }
 
-function loadUsers() {
-  const raw = localStorage.getItem(STORAGE_USERS);
-  return raw ? JSON.parse(raw) : [];
+async function registerUser({name, email, password, role}) {
+  try {
+    return await apiFetch('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, password, role }),
+    });
+  } catch (err) {
+    return { error: err.message };
+  }
 }
 
-function saveUsers(users) {
-  localStorage.setItem(STORAGE_USERS, JSON.stringify(users));
-}
-
-function findUser(email, role) {
-  const users = loadUsers();
-  return users.find(user => user.email.toLowerCase() === email.toLowerCase() && user.role === role);
-}
-
-function registerUser({name, email, password, role}) {
-  const users = loadUsers();
-  if (findUser(email, role)) {
+async function authenticateUser({email, password, role}) {
+  try {
+    return await apiFetch('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, role }),
+    });
+  } catch (err) {
     return null;
   }
-  const user = {
-    id: generateId('user'),
-    name,
-    email,
-    password,
-    role,
-  };
-  users.push(user);
-  saveUsers(users);
-  return user;
-}
-
-function authenticateUser({email, password, role}) {
-  const user = findUser(email, role);
-  if (!user || user.password !== password) {
-    return null;
-  }
-  return user;
 }
 
 function setLoginMode(mode) {
@@ -212,18 +210,18 @@ function openLoginModal(role) {
   loginNameInput.focus();
 }
 
-function openProfileModal() {
+async function openProfileModal() {
   const user = getCurrentUser();
   if (!user) {
     return;
   }
-  const profile = getProfileByOwnerId(user.role, user.id);
   profileForm.reset();
   profileMessage.textContent = '';
   profileModalTitle.textContent = user.role === 'tutor' ? 'Edit tutor profile' : 'Edit student profile';
   profileNameInput.value = user.name;
   profileEmailInput.value = user.email;
   showProfileFields(user.role);
+  const profile = await getProfileByOwnerId(user.role, user.id);
   populateProfileForm(user.role, profile);
   profileModal.classList.remove('hidden');
   profileNameInput.focus();
@@ -273,9 +271,9 @@ function closeLogin() {
   loginMessage.textContent = '';
 }
 
-function getProfileByOwnerId(role, ownerId) {
+async function getProfileByOwnerId(role, ownerId) {
   const key = role === 'tutor' ? STORAGE_TUTORS : STORAGE_STUDENTS;
-  const profiles = loadProfiles(key);
+  const profiles = await loadProfiles(key);
   return profiles.find(profile => profile.ownerId === ownerId) || null;
 }
 
@@ -283,8 +281,8 @@ function loadCurrentUserProfile() {
   renderTutorTable();
 }
 
-function renderTutorTable() {
-  const tutors = loadProfiles(STORAGE_TUTORS);
+async function renderTutorTable() {
+  const tutors = await loadProfiles(STORAGE_TUTORS);
   tutorTableBody.innerHTML = '';
 
   if (!tutors.length) {
@@ -366,9 +364,11 @@ function createProfileCard(profile, type) {
   return card;
 }
 
-function renderStudentSummary() {  if (!studentSummary) {
+async function renderStudentSummary() {
+  if (!studentSummary) {
     return;
-  }  const students = loadProfiles(STORAGE_STUDENTS);
+  }
+  const students = await loadProfiles(STORAGE_STUDENTS);
   studentSummary.innerHTML = '';
 
   if (!students.length) {
@@ -410,12 +410,14 @@ function renderStudentSummary() {  if (!studentSummary) {
   studentSummary.appendChild(card);
 }
 
-function renderStudentFeed() {
+async function renderStudentFeed() {
   if (!studentFeed) {
     return;
   }
-  const students = loadProfiles(STORAGE_STUDENTS);
-  const tutors = loadProfiles(STORAGE_TUTORS);
+  const [students, tutors] = await Promise.all([
+    loadProfiles(STORAGE_STUDENTS),
+    loadProfiles(STORAGE_TUTORS),
+  ]);
   studentFeed.innerHTML = '';
 
   if (!students.length) {
@@ -460,7 +462,6 @@ async function saveSignupProfile(role, user, formData) {
     }
     const photoFile = loginPhotoInput.files[0];
     const photoData = await readImage(photoFile);
-    const profiles = loadProfiles(STORAGE_TUTORS);
     const profile = {
       id: generateId('tutor'),
       ownerId: user.id,
@@ -478,8 +479,7 @@ async function saveSignupProfile(role, user, formData) {
       updatedAt: new Date().toISOString(),
       lastLoginAt: new Date().toISOString(),
     };
-    profiles.unshift(profile);
-    saveProfiles(STORAGE_TUTORS, profiles);
+    await upsertProfile(STORAGE_TUTORS, profile);
     return true;
   }
 
@@ -490,7 +490,6 @@ async function saveSignupProfile(role, user, formData) {
     if (!grade || !school) {
       return false;
     }
-    const profiles = loadProfiles(STORAGE_STUDENTS);
     const profile = {
       id: generateId('student'),
       ownerId: user.id,
@@ -503,8 +502,7 @@ async function saveSignupProfile(role, user, formData) {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    profiles.unshift(profile);
-    saveProfiles(STORAGE_STUDENTS, profiles);
+    await upsertProfile(STORAGE_STUDENTS, profile);
     return true;
   }
 
@@ -512,20 +510,11 @@ async function saveSignupProfile(role, user, formData) {
 }
 
 function handleClearTutors() {
-  if (!confirm('Remove all saved tutor profiles from this browser?')) {
-    return;
-  }
-  localStorage.removeItem(STORAGE_TUTORS);
-  renderTutorTable();
+  alert('Clearing all tutor profiles is no longer available from the browser. Data lives in Azure Table Storage.');
 }
 
 function handleClearStudents() {
-  if (!confirm('Remove all saved student profiles from this browser?')) {
-    return;
-  }
-  localStorage.removeItem(STORAGE_STUDENTS);
-  renderStudentSummary();
-  renderStudentFeed();
+  alert('Clearing all student profiles is no longer available from the browser. Data lives in Azure Table Storage.');
 }
 
 loginTutorButton.addEventListener('click', () => openLoginModal('tutor'));
@@ -575,14 +564,9 @@ loginForm.addEventListener('submit', async function (event) {
       return;
     }
 
-    if (findUser(email, role)) {
-      loginMessage.textContent = 'An account with that email already exists for this role.';
-      return;
-    }
-
-    const user = registerUser({ name, email, password, role });
-    if (!user) {
-      loginMessage.textContent = 'Unable to create account. Try again.';
+    const user = await registerUser({ name, email, password, role });
+    if (!user || user.error) {
+      loginMessage.textContent = (user && user.error) || 'Unable to create account. Try again.';
       return;
     }
 
@@ -598,18 +582,18 @@ loginForm.addEventListener('submit', async function (event) {
     return;
   }
 
-  const user = authenticateUser({ email, password, role });
+  const user = await authenticateUser({ email, password, role });
   if (!user) {
     loginMessage.textContent = 'Incorrect email or password for this role.';
     return;
   }
 
   if (role === 'tutor') {
-    const profiles = loadProfiles(STORAGE_TUTORS);
+    const profiles = await loadProfiles(STORAGE_TUTORS);
     const tutorProfile = profiles.find(p => p.ownerId === user.id);
     if (tutorProfile) {
       tutorProfile.lastLoginAt = new Date().toISOString();
-      saveProfiles(STORAGE_TUTORS, profiles);
+      await upsertProfile(STORAGE_TUTORS, tutorProfile);
     }
   }
 
@@ -624,7 +608,8 @@ profileForm.addEventListener('submit', async function (event) {
     return;
   }
   const role = user.role;
-  const profile = getProfileByOwnerId(role, user.id) || {
+  const existing = await getProfileByOwnerId(role, user.id);
+  const profile = existing || {
     id: generateId(role),
     ownerId: user.id,
     ownerEmail: user.email,
@@ -644,19 +629,24 @@ profileForm.addEventListener('submit', async function (event) {
     profile.bio = profileTutorBioInput.value.trim();
     const photoFile = profilePhotoInput.files[0];
     profile.photo = photoFile ? await readImage(photoFile) : profile.photo || '';
-    saveProfiles(STORAGE_TUTORS, [profile, ...loadProfiles(STORAGE_TUTORS).filter(item => item.ownerId !== user.id)]);
+    await upsertProfile(STORAGE_TUTORS, profile);
   } else {
     profile.topics = getCheckedTopics(profileForm, 'profileStudentTopics');
-    saveProfiles(STORAGE_STUDENTS, [profile, ...loadProfiles(STORAGE_STUDENTS).filter(item => item.ownerId !== user.id)]);
+    await upsertProfile(STORAGE_STUDENTS, profile);
   }
 
-  if (profileNameInput.value.trim() !== user.name) {
-    const users = loadUsers();
-    const current = users.find(item => item.id === user.id);
-    if (current) {
-      current.name = profileNameInput.value.trim();
-      saveUsers(users);
-      setCurrentUser(current);
+  const newName = profileNameInput.value.trim();
+  if (newName !== user.name) {
+    try {
+      const updated = await apiFetch('/auth/update-name', {
+        method: 'POST',
+        body: JSON.stringify({ email: user.email, role: user.role, name: newName }),
+      });
+      if (updated) {
+        setCurrentUser(updated);
+      }
+    } catch (err) {
+      console.error('Failed to update user name:', err);
     }
   }
 

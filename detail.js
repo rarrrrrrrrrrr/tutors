@@ -1,5 +1,6 @@
-const STORAGE_TUTORS = 'tutorProfiles';
-const STORAGE_STUDENTS = 'studentProfiles';
+const STORAGE_TUTORS = 'tutor';
+const STORAGE_STUDENTS = 'student';
+const API_BASE = '/api';
 const detailHeading = document.getElementById('detailHeading');
 const detailDescription = document.getElementById('detailDescription');
 const detailContent = document.getElementById('detailContent');
@@ -13,9 +14,29 @@ function parseQuery() {
   return new URLSearchParams(window.location.search);
 }
 
-function loadProfiles(key) {
-  const raw = localStorage.getItem(key);
-  return raw ? JSON.parse(raw) : [];
+async function loadProfiles(key) {
+  const route = key === STORAGE_TUTORS ? 'tutors' : 'students';
+  try {
+    const response = await fetch(`${API_BASE}/${route}`);
+    if (!response.ok) return [];
+    const data = await response.json();
+    return Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error(`Failed to load ${route}:`, err);
+    return [];
+  }
+}
+
+async function loadProfileById(key, id) {
+  const route = key === STORAGE_TUTORS ? 'tutors' : 'students';
+  try {
+    const response = await fetch(`${API_BASE}/${route}/${encodeURIComponent(id)}`);
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (err) {
+    console.error(`Failed to load ${route}/${id}:`, err);
+    return null;
+  }
 }
 
 function formatLastLogin(isoString) {
@@ -155,9 +176,11 @@ function renderDetail(profile, type) {
   detailContent.appendChild(card);
 }
 
-function renderMatches(profile, type) {
-  const tutors = loadProfiles(STORAGE_TUTORS);
-  const students = loadProfiles(STORAGE_STUDENTS);
+async function renderMatches(profile, type) {
+  const [tutors, students] = await Promise.all([
+    loadProfiles(STORAGE_TUTORS),
+    loadProfiles(STORAGE_STUDENTS),
+  ]);
 
   if (type === 'student') {
     const matches = tutors.filter(tutor => tutor.topics.some(topic => profile.topics.includes(topic)));
@@ -192,7 +215,7 @@ function renderMatches(profile, type) {
   matchSection.style.display = 'block';
 }
 
-function initPage() {
+async function initPage() {
   const params = parseQuery();
   const type = params.get('type');
   const id = params.get('id');
@@ -202,8 +225,8 @@ function initPage() {
     return;
   }
 
-  const profiles = loadProfiles(type === 'tutor' ? STORAGE_TUTORS : STORAGE_STUDENTS);
-  const profile = profiles.find(item => item.id === id);
+  const key = type === 'tutor' ? STORAGE_TUTORS : STORAGE_STUDENTS;
+  const profile = await loadProfileById(key, id);
 
   if (!profile) {
     showError('Profile not found.');
@@ -211,7 +234,7 @@ function initPage() {
   }
 
   renderDetail(profile, type);
-  renderMatches(profile, type);
+  await renderMatches(profile, type);
 }
 
 initPage();

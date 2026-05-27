@@ -1,0 +1,16 @@
+{
+  "name": "tutors-api",
+  "version": "1.0.0",
+  "description": "Azure Functions API for the tutors static web app, backed by Azure Table Storage.",
+  "main": "src/functions/*.js",
+  "scripts": {
+    "start": "func start"
+  },
+  "dependencies": {
+    "@azure/data-tables": "^13.2.2",
+    "@azure/functions": "^4.5.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
