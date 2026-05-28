@@ -64,7 +64,54 @@ body {
 
 .login-modal h2 {
   margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #1e293b;
+  font-size: 1.5rem;
+  text-align: center;
 }
+
+/* Auth Pages */
+.auth-page {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.login-modal.static {
+  position: static;
+  transform: none;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  max-width: 540px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.auth-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .auth-container {
+    padding: 1rem;
+  }
+  
+  .login-modal.static {
+    padding: 1.5rem;
+  }
+}
+
 
 .login-modal label {
   display: block;

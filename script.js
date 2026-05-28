@@ -4,29 +4,10 @@ const tutorTableWrapper = document.getElementById('tutorTableWrapper');
 const tutorTableBody = document.getElementById('tutorTableBody');
 const loginTutorButton = document.getElementById('loginTutorButton');
 const loginStudentButton = document.getElementById('loginStudentButton');
+const signupButton = document.getElementById('signupButton');
 const profileButton = document.getElementById('profileButton');
 const logoutButton = document.getElementById('logoutButton');
 const loginStatus = document.getElementById('loginStatus');
-const loginModal = document.getElementById('loginModal');
-const closeLoginModal = document.getElementById('closeLoginModal');
-const loginForm = document.getElementById('loginForm');
-const loginRoleInput = document.getElementById('loginRole');
-const loginModalTitle = document.getElementById('loginModalTitle');
-const loginNameInput = document.getElementById('loginName');
-const loginNameWrapper = document.getElementById('loginNameWrapper');
-const loginEmailInput = document.getElementById('loginEmail');
-const loginPasswordInput = document.getElementById('loginPassword');
-const loginConfirmPasswordInput = document.getElementById('loginConfirmPassword');
-const loginMessage = document.getElementById('loginMessage');
-const toggleLoginMode = document.getElementById('toggleLoginMode');
-const loginSubmitButton = document.getElementById('loginSubmitButton');
-const loginSwitchMessage = document.getElementById('loginSwitchMessage');
-const tutorSignupFields = document.getElementById('tutorSignupFields');
-const studentSignupFields = document.getElementById('studentSignupFields');
-const loginPhotoInput = document.getElementById('loginPhoto');
-const loginTutorWageInput = document.getElementById('loginTutorWage');
-const loginTutorScheduleInput = document.getElementById('loginTutorSchedule');
-const loginTutorBioInput = document.getElementById('loginTutorBio');
 const profileModal = document.getElementById('profileModal');
 const closeProfileModal = document.getElementById('closeProfileModal');
 const profileForm = document.getElementById('profileForm');
@@ -44,147 +25,6 @@ const profilePhotoInput = document.getElementById('profilePhoto');
 const profileTutorFields = document.getElementById('profileTutorFields');
 const profileStudentFields = document.getElementById('profileStudentFields');
 
-const STORAGE_TUTORS = 'tutor';
-const STORAGE_STUDENTS = 'student';
-const CURRENT_USER_KEY = 'currentUser';
-const API_BASE = '/api';
-let loginMode = 'login';
-
-function generateId(prefix) {
-  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-async function apiFetch(path, options = {}) {
-  const response = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  });
-  if (!response.ok) {
-    let message = `Request failed (${response.status})`;
-    try {
-      const body = await response.json();
-      if (body && body.error) message = body.error;
-    } catch {}
-    const err = new Error(message);
-    err.status = response.status;
-    throw err;
-  }
-  if (response.status === 204) return null;
-  return response.json();
-}
-
-async function loadProfiles(key) {
-  const route = key === STORAGE_TUTORS ? 'tutors' : 'students';
-  try {
-    const profiles = await apiFetch(`/${route}`);
-    return Array.isArray(profiles) ? profiles : [];
-  } catch (err) {
-    console.error(`Failed to load ${route}:`, err);
-    return [];
-  }
-}
-
-async function upsertProfile(key, profile) {
-  const route = key === STORAGE_TUTORS ? 'tutors' : 'students';
-  return apiFetch(`/${route}`, {
-    method: 'POST',
-    body: JSON.stringify(profile),
-  });
-}
-
-function getCurrentUser() {
-  const raw = sessionStorage.getItem(CURRENT_USER_KEY);
-  return raw ? JSON.parse(raw) : null;
-}
-
-function setCurrentUser(user) {
-  sessionStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
-  renderLoginState();
-  loadCurrentUserProfile();
-}
-
-function clearCurrentUser() {
-  sessionStorage.removeItem(CURRENT_USER_KEY);
-  loginMode = 'login';
-  renderLoginState();
-  loadCurrentUserProfile();
-}
-
-async function registerUser({name, email, password, role}) {
-  try {
-    return await apiFetch('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({ name, email, password, role }),
-    });
-  } catch (err) {
-    return { error: err.message };
-  }
-}
-
-async function authenticateUser({email, password, role}) {
-  try {
-    return await apiFetch('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password, role }),
-    });
-  } catch (err) {
-    return null;
-  }
-}
-
-function setLoginMode(mode) {
-  loginMode = mode;
-  if (mode === 'signup') {
-    toggleLoginMode.textContent = 'Log in';
-    loginSwitchMessage.textContent = 'Already have an account?';
-    loginModalTitle.textContent = loginRoleInput.value === 'tutor' ? 'Tutor sign up' : 'Student sign up';
-    loginSubmitButton.textContent = 'Sign up';
-    loginNameInput.required = true;
-    if (loginNameWrapper) {
-      loginNameWrapper.classList.remove('hidden');
-    }
-    loginConfirmPasswordInput.value = '';
-    loginConfirmPasswordInput.required = true;
-    document.getElementById('confirmPasswordWrapper').classList.remove('hidden');
-  } else {
-    toggleLoginMode.textContent = 'Sign up';
-    loginSwitchMessage.textContent = 'Don\'t have an account?';
-    loginModalTitle.textContent = loginRoleInput.value === 'tutor' ? 'Tutor login' : 'Student login';
-    loginSubmitButton.textContent = 'Sign in';
-    loginNameInput.required = false;
-    if (loginNameWrapper) {
-      loginNameWrapper.classList.add('hidden');
-    }
-    loginConfirmPasswordInput.required = false;
-    document.getElementById('confirmPasswordWrapper').classList.add('hidden');
-  }
-  updateSignupFields();
-  loginMessage.textContent = '';
-}
-
-function updateSignupFields() {
-  const isSignup = loginMode === 'signup';
-  const role = loginRoleInput.value;
-  const tutorVisible = isSignup && role === 'tutor';
-  const studentVisible = isSignup && role === 'student';
-
-  tutorSignupFields.classList.toggle('hidden', !tutorVisible);
-  studentSignupFields.classList.toggle('hidden', !studentVisible);
-
-  Array.from(tutorSignupFields.querySelectorAll('input, select, textarea')).forEach(field => {
-    field.disabled = !tutorVisible;
-    if (field.name === 'grade' || field.name === 'school') {
-      field.required = tutorVisible;
-    }
-  });
-  Array.from(studentSignupFields.querySelectorAll('input, select, textarea')).forEach(field => {
-    field.disabled = !studentVisible;
-    if (field.name === 'grade' || field.name === 'school') {
-      field.required = studentVisible;
-    }
-  });
-}
-
 function renderLoginState() {
   const user = getCurrentUser();
 
@@ -192,22 +32,24 @@ function renderLoginState() {
     loginStatus.textContent = '';
     logoutButton.classList.add('hidden');
     profileButton.classList.add('hidden');
-    toggleLoginMode.classList.remove('hidden');
+    loginTutorButton.classList.remove('hidden');
+    loginStudentButton.classList.remove('hidden');
+    signupButton.classList.remove('hidden');
     return;
   }
 
   loginStatus.textContent = `Logged in as ${user.role} • ${user.name}`;
   logoutButton.classList.remove('hidden');
   profileButton.classList.remove('hidden');
-  toggleLoginMode.classList.add('hidden');
+  loginTutorButton.classList.add('hidden');
+  loginStudentButton.classList.add('hidden');
+  signupButton.classList.add('hidden');
 }
 
-function openLoginModal(role) {
-  loginRoleInput.value = role;
-  loginForm.reset();
-  setLoginMode('login');
-  loginModal.classList.remove('hidden');
-  loginNameInput.focus();
+function handleLogout() {
+  clearCurrentUser();
+  renderLoginState();
+  renderTutorTable();
 }
 
 async function openProfileModal() {
@@ -265,22 +107,6 @@ function populateProfileForm(role, profile) {
   }
 }
 
-function closeLogin() {
-  loginModal.classList.add('hidden');
-  loginForm.reset();
-  loginMessage.textContent = '';
-}
-
-async function getProfileByOwnerId(role, ownerId) {
-  const key = role === 'tutor' ? STORAGE_TUTORS : STORAGE_STUDENTS;
-  const profiles = await loadProfiles(key);
-  return profiles.find(profile => profile.ownerId === ownerId) || null;
-}
-
-function loadCurrentUserProfile() {
-  renderTutorTable();
-}
-
 async function renderTutorTable() {
   const tutors = await loadProfiles(STORAGE_TUTORS);
   tutorTableBody.innerHTML = '';
@@ -310,295 +136,13 @@ async function renderTutorTable() {
   });
 }
 
-function normalizeText(value) {
-  return String(value || '').trim().toLowerCase();
-}
-
-function createProfileCard(profile, type) {
-  const card = document.createElement('article');
-  card.className = 'profile-card';
-  if (type !== 'tutor') {
-    card.classList.add('student-card');
-  }
-
-  if (type === 'tutor') {
-    const avatar = document.createElement('img');
-    avatar.src = profile.photo || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect width="100" height="100" fill="%23e2e8f0"/%3E%3Ccircle cx="50" cy="35" r="20" fill="%23c7d2fe"/%3E%3Crect x="25" y="60" width="50" height="22" rx="10" fill="%23c7d2fe"/%3E%3C/svg%3E';
-    avatar.alt = `${profile.name} profile photo`;
-    card.appendChild(avatar);
-  }
-
-  const details = document.createElement('div');
-  details.className = 'profile-details';
-
-  const title = document.createElement('h3');
-  title.textContent = profile.name;
-  details.appendChild(title);
-
-  const meta = document.createElement('div');
-  meta.className = 'profile-meta';
-  meta.innerHTML = `
-    <span class="meta-pill">${profile.pronouns || 'Pronouns not specified'}</span>
-    <span class="meta-pill">Grade ${profile.grade}</span>
-    <span class="meta-pill">${profile.school}</span>
-  `;
-
-  if (type === 'tutor') {
-    meta.innerHTML += `<span class="meta-pill">${profile.wage}</span>`;
-  }
-
-  details.appendChild(meta);
-
-  const list = document.createElement('ul');
-  list.className = 'topics-list';
-  list.innerHTML = profile.topics.map(topic => `<li>${topic}</li>`).join('');
-  details.appendChild(list);
-
-  const profileLink = document.createElement('a');
-  profileLink.className = 'profile-link';
-  profileLink.href = `detail.html?type=${type}&id=${encodeURIComponent(profile.id)}`;
-  profileLink.textContent = type === 'tutor' ? 'View tutor profile' : 'View student profile';
-  details.appendChild(profileLink);
-
-  card.appendChild(details);
-  return card;
-}
-
-async function renderStudentSummary() {
-  if (!studentSummary) {
-    return;
-  }
-  const students = await loadProfiles(STORAGE_STUDENTS);
-  studentSummary.innerHTML = '';
-
-  if (!students.length) {
-    studentSummary.innerHTML = '<div class="empty-state"><strong>No saved student profile yet.</strong><p>Student data is kept private and only used for tutor recommendations.</p></div>';
-    return;
-  }
-
-  const latestStudent = students[0];
-  const card = document.createElement('article');
-  card.className = 'profile-card student-card';
-
-  const details = document.createElement('div');
-  details.className = 'profile-details';
-
-  const title = document.createElement('h3');
-  title.textContent = latestStudent.name;
-  details.appendChild(title);
-
-  const meta = document.createElement('div');
-  meta.className = 'profile-meta';
-  meta.innerHTML = `
-    <span class="meta-pill">${latestStudent.pronouns || 'Pronouns not specified'}</span>
-    <span class="meta-pill">Grade ${latestStudent.grade}</span>
-    <span class="meta-pill">${latestStudent.school}</span>
-  `;
-  details.appendChild(meta);
-
-  const list = document.createElement('ul');
-  list.className = 'topics-list';
-  list.innerHTML = latestStudent.topics.map(topic => `<li>${topic}</li>`).join('');
-  details.appendChild(list);
-
-  const note = document.createElement('p');
-  note.className = 'private-note';
-  note.textContent = 'This student profile is private and used only to generate tutor recommendations.';
-  details.appendChild(note);
-
-  card.appendChild(details);
-  studentSummary.appendChild(card);
-}
-
-async function renderStudentFeed() {
-  if (!studentFeed) {
-    return;
-  }
-  const [students, tutors] = await Promise.all([
-    loadProfiles(STORAGE_STUDENTS),
-    loadProfiles(STORAGE_TUTORS),
-  ]);
-  studentFeed.innerHTML = '';
-
-  if (!students.length) {
-    studentFeed.innerHTML = '<div class="empty-state"><strong>Add a student profile first.</strong><p>Saved student profiles create a tutor feed that matches shared topics.</p></div>';
-    return;
-  }
-
-  const latestStudent = students[0];
-  const matches = tutors.filter(tutor => tutor.topics.some(topic => latestStudent.topics.includes(topic)));
-
-  if (!matches.length) {
-    studentFeed.innerHTML = '<div class="empty-state"><strong>No tutor matches yet.</strong><p>Save tutor profiles with topics that match the student interests to populate this feed.</p></div>';
-    return;
-  }
-
-  matches.forEach(profile => studentFeed.appendChild(createProfileCard(profile, 'tutor')));
-}
-
-function getCheckedTopics(form, name) {
-  return Array.from(form.querySelectorAll(`input[name="${name}"]:checked`)).map(input => input.value);
-}
-
-function readImage(file) {
-  return new Promise((resolve, reject) => {
-    if (!file) {
-      return resolve('');
-    }
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () => reject(new Error('Failed to read image'));
-    reader.readAsDataURL(file);
-  });
-}
-
-async function saveSignupProfile(role, user, formData) {
-  if (role === 'tutor') {
-    const topics = getCheckedTopics(loginForm, 'signupTopics');
-    const grade = formData.get('grade');
-    const school = formData.get('school').trim();
-    if (!grade || !school) {
-      return false;
-    }
-    const photoFile = loginPhotoInput.files[0];
-    const photoData = await readImage(photoFile);
-    const profile = {
-      id: generateId('tutor'),
-      ownerId: user.id,
-      ownerEmail: user.email,
-      name: user.name,
-      pronouns: formData.get('pronouns').trim(),
-      grade,
-      school,
-      wage: formData.get('wage').trim(),
-      schedule: formData.get('schedule').trim(),
-      bio: formData.get('bio').trim(),
-      topics: topics.length ? topics : ['No topics selected'],
-      photo: photoData,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      lastLoginAt: new Date().toISOString(),
-    };
-    await upsertProfile(STORAGE_TUTORS, profile);
-    return true;
-  }
-
-  if (role === 'student') {
-    const topics = getCheckedTopics(loginForm, 'signupStudentTopics');
-    const grade = formData.get('grade');
-    const school = formData.get('school').trim();
-    if (!grade || !school) {
-      return false;
-    }
-    const profile = {
-      id: generateId('student'),
-      ownerId: user.id,
-      ownerEmail: user.email,
-      name: user.name,
-      pronouns: formData.get('pronouns').trim(),
-      grade,
-      school,
-      topics: topics.length ? topics : ['No topics selected'],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    await upsertProfile(STORAGE_STUDENTS, profile);
-    return true;
-  }
-
-  return false;
-}
-
-function handleClearTutors() {
-  alert('Clearing all tutor profiles is no longer available from the browser. Data lives in Azure Table Storage.');
-}
-
-function handleClearStudents() {
-  alert('Clearing all student profiles is no longer available from the browser. Data lives in Azure Table Storage.');
-}
-
-loginTutorButton.addEventListener('click', () => openLoginModal('tutor'));
-loginStudentButton.addEventListener('click', () => openLoginModal('student'));
 profileButton.addEventListener('click', openProfileModal);
-logoutButton.addEventListener('click', clearCurrentUser);
-closeLoginModal.addEventListener('click', closeLogin);
+logoutButton.addEventListener('click', handleLogout);
 closeProfileModal.addEventListener('click', closeProfile);
-loginModal.addEventListener('click', event => {
-  if (event.target === loginModal) {
-    closeLogin();
-  }
-});
 profileModal.addEventListener('click', event => {
   if (event.target === profileModal) {
     closeProfile();
   }
-});
-toggleLoginMode.addEventListener('click', () => {
-  setLoginMode(loginMode === 'login' ? 'signup' : 'login');
-});
-
-loginForm.addEventListener('submit', async function (event) {
-  event.preventDefault();
-  const formData = new FormData(loginForm);
-  const role = formData.get('role');
-  const name = formData.get('name').trim();
-  const email = formData.get('email').trim().toLowerCase();
-  const password = formData.get('password');
-
-  if ((loginMode === 'signup' && !name) || !email || !password) {
-    loginMessage.textContent = 'Please complete all required fields.';
-    return;
-  }
-
-  if (loginMode === 'signup') {
-    const confirmPassword = formData.get('confirmPassword');
-    if (password !== confirmPassword) {
-      loginMessage.textContent = 'Passwords do not match.';
-      return;
-    }
-
-    const grade = formData.get('grade');
-    const school = formData.get('school')?.trim();
-    if (!grade || !school) {
-      loginMessage.textContent = 'Please complete the profile fields for your selected role.';
-      return;
-    }
-
-    const user = await registerUser({ name, email, password, role });
-    if (!user || user.error) {
-      loginMessage.textContent = (user && user.error) || 'Unable to create account. Try again.';
-      return;
-    }
-
-    const profileSaved = await saveSignupProfile(role, user, formData);
-    if (!profileSaved) {
-      loginMessage.textContent = 'Please complete the profile fields for your selected role.';
-      return;
-    }
-
-    setCurrentUser(user);
-    closeLogin();
-    renderTutorTable();
-    return;
-  }
-
-  const user = await authenticateUser({ email, password, role });
-  if (!user) {
-    loginMessage.textContent = 'Incorrect email or password for this role.';
-    return;
-  }
-
-  if (role === 'tutor') {
-    const profiles = await loadProfiles(STORAGE_TUTORS);
-    const tutorProfile = profiles.find(p => p.ownerId === user.id);
-    if (tutorProfile) {
-      tutorProfile.lastLoginAt = new Date().toISOString();
-      await upsertProfile(STORAGE_TUTORS, tutorProfile);
-    }
-  }
-
-  setCurrentUser(user);
-  closeLogin();
 });
 
 profileForm.addEventListener('submit', async function (event) {
@@ -643,7 +187,9 @@ profileForm.addEventListener('submit', async function (event) {
         body: JSON.stringify({ email: user.email, role: user.role, name: newName }),
       });
       if (updated) {
-        setCurrentUser(updated);
+        // We need a way to update the user in the session
+        sessionStorage.setItem('currentUser', JSON.stringify(updated));
+        renderLoginState();
       }
     } catch (err) {
       console.error('Failed to update user name:', err);
@@ -655,6 +201,6 @@ profileForm.addEventListener('submit', async function (event) {
   setTimeout(closeProfile, 1200);
 });
 
+// Initial load
 renderLoginState();
-loadCurrentUserProfile();
 renderTutorTable();

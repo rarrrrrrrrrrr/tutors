@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up - Learning Matchmaker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="auth-page">
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <h1>Learning Matchmaker</h1>
+        <p>Create an account to start matching with tutors or students.</p>
+      </div>
+    </header>
+    <main class="auth-container">
+      <div class="login-modal static">
+        <h2>Sign up</h2>
+        <p id="loginMessage" class="login-message"></p>
+        <form id="loginForm">
+          <label>
+            Role
+            <select id="loginRole" name="role" required>
+              <option value="tutor">Tutor</option>
+              <option value="student">Student</option>
+            </select>
+          </label>
+          <label>
+            Name
+            <input type="text" id="loginName" name="name" placeholder="Your name" required />
+          </label>
+          <label>
+            Email
+            <input type="email" id="loginEmail" name="email" placeholder="you@example.com" required />
+          </label>
+          <label>
+            Password
+            <input type="password" id="loginPassword" name="password" placeholder="Password" required />
+          </label>
+          <label class="confirm-password">
+            Confirm password
+            <input type="password" id="loginConfirmPassword" name="confirmPassword" placeholder="Confirm password" required />
+          </label>
+
+          <div id="tutorSignupFields" class="role-fields hidden">
+            <label>
+              Pronouns
+              <input type="text" id="loginTutorPronouns" name="pronouns" placeholder="She/Her, They/Them" />
+            </label>
+            <label>
+              Grade
+              <select id="loginTutorGrade" name="grade">
+                <option value="">Choose grade</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="College">College</option>
+                <option value="Graduate">Graduate</option>
+                <option value="Other">Other</option>
+              </select>
+            </label>
+            <label>
+              School
+              <input type="text" id="loginTutorSchool" name="school" placeholder="Lincoln High School" />
+            </label>
+            <fieldset class="topics-fieldset">
+              <legend>Topics you tutor</legend>
+              <label><input type="checkbox" value="Math" name="signupTopics" /> Math</label>
+              <label><input type="checkbox" value="Science" name="signupTopics" /> Science</label>
+              <label><input type="checkbox" value="English" name="signupTopics" /> English</label>
+              <label><input type="checkbox" value="History" name="signupTopics" /> History</label>
+              <label><input type="checkbox" value="Computer Science" name="signupTopics" /> Computer Science</label>
+              <label><input type="checkbox" value="Spanish" name="signupTopics" /> Spanish</label>
+              <label><input type="checkbox" value="Test Prep" name="signupTopics" /> Test Prep</label>
+              <label><input type="checkbox" value="SAT prep help" name="signupTopics" /> SAT prep help</label>
+              <label><input type="checkbox" value="ACT prep help" name="signupTopics" /> ACT prep help</label>
+              <label><input type="checkbox" value="College Application help" name="signupTopics" /> College Application help</label>
+              <label><input type="checkbox" value="Essay writing help" name="signupTopics" /> Essay writing help</label>
+            </fieldset>
+            <label>
+              Cost / Hour
+              <input type="text" id="loginTutorWage" name="wage" placeholder="$25 / hour" />
+            </label>
+            <label>
+              Schedule
+              <input type="text" id="loginTutorSchedule" name="schedule" placeholder="Mon-Fri 4pm-8pm, Sat mornings" />
+            </label>
+            <label>
+              Information about me
+              <textarea id="loginTutorBio" name="bio" placeholder="Describe your teaching approach, subjects, and experience." rows="4"></textarea>
+            </label>
+            <label class="file-label">
+              Profile photo
+              <input type="file" id="loginPhoto" name="photo" accept="image/*" />
+            </label>
+          </div>
+
+          <div id="studentSignupFields" class="role-fields hidden">
+            <label>
+              Pronouns
+              <input type="text" id="loginStudentPronouns" name="pronouns" placeholder="They/Them, He/Him" />
+            </label>
+            <label>
+              Grade
+              <select id="loginStudentGrade" name="grade">
+                <option value="">Choose grade</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="College">College</option>
+                <option value="Graduate">Graduate</option>
+                <option value="Other">Other</option>
+              </select>
+            </label>
+            <label>
+              School
+              <input type="text" id="loginStudentSchool" name="school" placeholder="Riverside Middle School" />
+            </label>
+            <fieldset class="topics-fieldset">
+              <legend>Topics you want to learn</legend>
+              <label><input type="checkbox" value="Math" name="signupStudentTopics" /> Math</label>
+              <label><input type="checkbox" value="Science" name="signupStudentTopics" /> Science</label>
+              <label><input type="checkbox" value="English" name="signupStudentTopics" /> English</label>
+              <label><input type="checkbox" value="History" name="signupStudentTopics" /> History</label>
+              <label><input type="checkbox" value="Computer Science" name="signupStudentTopics" /> Computer Science</label>
+              <label><input type="checkbox" value="Spanish" name="signupStudentTopics" /> Spanish</label>
+              <label><input type="checkbox" value="Test Prep" name="signupStudentTopics" /> Test Prep</label>
+              <label><input type="checkbox" value="SAT prep help" name="signupStudentTopics" /> SAT prep help</label>
+              <label><input type="checkbox" value="ACT prep help" name="signupStudentTopics" /> ACT prep help</label>
+              <label><input type="checkbox" value="College Application help" name="signupStudentTopics" /> College Application help</label>
+              <label><input type="checkbox" value="Essay writing help" name="signupStudentTopics" /> Essay writing help</label>
+            </fieldset>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" id="loginSubmitButton">Sign up</button>
+          </div>
+        </form>
+        <p class="login-switch">
+          Already have an account?
+          <a href="login.html" class="link-button">Log in</a>
+        </p>
+        <p class="login-switch">
+          <a href="index.html" class="link-button">Back to home</a>
+        </p>
+      </div>
+    </main>
+  </div>
+  <script src="utils.js"></script>
+  <script src="signup.js"></script>
+</body>
+</html>

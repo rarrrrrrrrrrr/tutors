@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Learning Matchmaker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="auth-page">
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <h1>Learning Matchmaker</h1>
+        <p>Log in to your account to manage your profile and matches.</p>
+      </div>
+    </header>
+    <main class="auth-container">
+      <div class="login-modal static">
+        <h2>Log in</h2>
+        <p id="loginMessage" class="login-message"></p>
+        <form id="loginForm">
+          <label>
+            Role
+            <select id="loginRole" name="role" required>
+              <option value="tutor">Tutor</option>
+              <option value="student">Student</option>
+            </select>
+          </label>
+          <label>
+            Email
+            <input type="email" id="loginEmail" name="email" placeholder="you@example.com" required />
+          </label>
+          <label>
+            Password
+            <input type="password" id="loginPassword" name="password" placeholder="Password" required />
+          </label>
+          <div class="form-actions">
+            <button type="submit" id="loginSubmitButton">Sign in</button>
+          </div>
+        </form>
+        <p class="login-switch">
+          Don't have an account?
+          <a href="signup.html" class="link-button">Sign up</a>
+        </p>
+        <p class="login-switch">
+          <a href="index.html" class="link-button">Back to home</a>
+        </p>
+      </div>
+    </main>
+  </div>
+  <script src="utils.js"></script>
+  <script src="login.js"></script>
+</body>
+</html>
