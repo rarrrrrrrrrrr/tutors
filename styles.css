@@ -321,8 +321,9 @@ button[type='submit'] {
 }
 
 button.secondary {
-  background: #eef2ff;
+  background: #ffffff;
   color: #3730a3;
+  border: 1px solid #e5e7eb;
 }
 
 .profile-grid {
