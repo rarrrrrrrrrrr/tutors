@@ -16,7 +16,7 @@
       <div class="hero-actions" id="heroActions">
         <button id="loginButton" class="secondary" onclick="window.location.href='login.html'">Login</button>
         <button id="signupButton" class="secondary" onclick="window.location.href='signup.html'">Sign up</button>
-        <button id="profileButton" class="secondary hidden">My profile</button>
+        <button id="profileButton" class="secondary hidden" onclick="window.location.href='profile.html'">My profile</button>
         <button id="logoutButton" class="secondary hidden">Logout</button>
         <span id="loginStatus" class="login-status"></span>
       </div>
@@ -46,100 +46,6 @@
         </div>
       </section>
     </main>
-  </div>
-
-  <div class="modal-overlay hidden" id="profileModal">
-    <div class="login-modal">
-      <button type="button" class="close-modal" id="closeProfileModal">×</button>
-      <h2 id="profileModalTitle">My profile</h2>
-      <p id="profileMessage" class="login-message"></p>
-      <form id="profileForm">
-        <label>
-          Name
-          <input type="text" id="profileName" name="name" placeholder="Your full name" required />
-        </label>
-        <label>
-          Email
-          <input type="email" id="profileEmail" name="email" disabled />
-        </label>
-
-        <label>
-          Pronouns
-          <input type="text" id="profilePronouns" name="pronouns" placeholder="She/Her, They/Them" />
-        </label>
-        <label>
-          Grade
-          <select id="profileGrade" name="grade">
-            <option value="">Choose grade</option>
-            <option value="9">9</option>
-            <option value="10">10</option>
-            <option value="11">11</option>
-            <option value="12">12</option>
-            <option value="College">College</option>
-            <option value="Graduate">Graduate</option>
-            <option value="Other">Other</option>
-          </select>
-        </label>
-        <label>
-          School
-          <input type="text" id="profileSchool" name="school" placeholder="Lincoln High School" />
-        </label>
-
-        <div id="profileTutorFields" class="role-fields hidden">
-          <fieldset class="topics-fieldset">
-            <legend>Topics you tutor</legend>
-            <label><input type="checkbox" value="Math" name="profileTopics" /> Math</label>
-            <label><input type="checkbox" value="Science" name="profileTopics" /> Science</label>
-            <label><input type="checkbox" value="English" name="profileTopics" /> English</label>
-            <label><input type="checkbox" value="History" name="profileTopics" /> History</label>
-            <label><input type="checkbox" value="Computer Science" name="profileTopics" /> Computer Science</label>
-            <label><input type="checkbox" value="Spanish" name="profileTopics" /> Spanish</label>
-            <label><input type="checkbox" value="Test Prep" name="profileTopics" /> Test Prep</label>
-            <label><input type="checkbox" value="SAT prep help" name="profileTopics" /> SAT prep help</label>
-            <label><input type="checkbox" value="ACT prep help" name="profileTopics" /> ACT prep help</label>
-            <label><input type="checkbox" value="College Application help" name="profileTopics" /> College Application help</label>
-            <label><input type="checkbox" value="Essay writing help" name="profileTopics" /> Essay writing help</label>
-          </fieldset>
-          <label>
-            Cost / Hour
-            <input type="text" id="profileWage" name="wage per hour" placeholder="$25 / hour" />
-          </label>
-          <label>
-            Schedule
-            <input type="text" id="profileTutorSchedule" name="schedule" placeholder="Mon-Fri 4pm-8pm, Sat mornings" />
-          </label>
-          <label>
-            Information about me
-            <textarea id="profileTutorBio" name="bio" placeholder="Describe your teaching approach, subjects, and experience." rows="4"></textarea>
-          </label>
-          <label class="file-label">
-            Profile photo
-            <input type="file" id="profilePhoto" name="photo" accept="image/*" />
-          </label>
-        </div>
-
-        <div id="profileStudentFields" class="role-fields hidden">
-          <fieldset class="topics-fieldset">
-            <legend>Topics you want to learn</legend>
-            <label><input type="checkbox" value="Math" name="profileStudentTopics" /> Math</label>
-            <label><input type="checkbox" value="Science" name="profileStudentTopics" /> Science</label>
-            <label><input type="checkbox" value="English" name="profileStudentTopics" /> English</label>
-            <label><input type="checkbox" value="History" name="profileStudentTopics" /> History</label>
-            <label><input type="checkbox" value="Computer Science" name="profileStudentTopics" /> Computer Science</label>
-            <label><input type="checkbox" value="Spanish" name="profileStudentTopics" /> Spanish</label>
-            <label><input type="checkbox" value="Test Prep" name="profileStudentTopics" /> Test Prep</label>
-            <label><input type="checkbox" value="SAT prep help" name="profileStudentTopics" /> SAT prep help</label>
-            <label><input type="checkbox" value="ACT prep help" name="profileStudentTopics" /> ACT prep help</label>
-            <label><input type="checkbox" value="College Application help" name="profileStudentTopics" /> College Application help</label>
-            <label><input type="checkbox" value="Essay writing help" name="profileStudentTopics" /> Essay writing help</label>
-          </fieldset>
-        </div>
-
-        <div class="form-actions">
-          <button type="submit" id="saveProfileButton">Save profile</button>
-        </div>
-      </form>
-    </div>
   </div>
 
   <script src="utils.js"></script>

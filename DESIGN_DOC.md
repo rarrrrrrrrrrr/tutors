@@ -6,7 +6,7 @@ This is a lightweight client-side web app for matching students with tutors usin
 ## Goals
 - Keep the homepage uncluttered and focused on student summary + tutor recommendations
 - Move authentication (login/signup) to dedicated pages
-- Consolidate profile creation and editing into modal dialogs
+- Move profile creation and editing to a dedicated page
 - Preserve student privacy by not exposing student profile details publicly
 - Allow users to view and update their profile after login
 - Implement role-based behavior for tutors and students
@@ -21,10 +21,9 @@ This is a lightweight client-side web app for matching students with tutors usin
 ## UI Structure
 ### Main page (index.html)
 - Header with links/buttons:
-  - `Tutor login` (links to login.html)
-  - `Student login` (links to login.html)
+  - `Login` (links to login.html)
   - `Sign up` (links to signup.html)
-  - `My profile` (visible when logged in)
+  - `My profile` (links to profile.html, visible when logged in)
   - `Logout` (visible when logged in)
   - Login status text
 - Section: `Your student profile`
@@ -43,10 +42,9 @@ This is a lightweight client-side web app for matching students with tutors usin
 - Role-specific fields displayed dynamically
 - Links to login
 
-### Modals
-#### Profile modal (in index.html)
+### Profile Page (profile.html)
+- Standalone page for editing profile fields
 - Visible only after login
-- Allows editing and saving profile fields
 - `Email` is shown but disabled
 - Role-specific fields displayed dynamically:
   - Tutors can edit tutor-specific profile fields and photo
@@ -62,20 +60,22 @@ This is a lightweight client-side web app for matching students with tutors usin
 ### Profile persistence
 - Profiles are saved to Azure Table Storage via the `/api/tutors` and `/api/students` routes.
 - Each profile is linked by `ownerId`
-- `My profile` modal opens the logged-in user's profile for editing
+- `My profile` page allows editing the logged-in user's profile
 
 ## Component Responsibilities
 ### `utils.js`
-- Shared core functions (API calls, session management, profile loading)
+- Shared core functions (API calls, session management, profile loading, image resizing)
 
 ### `script.js`
 - Dashboard-specific logic (rendering tutor table, student summary, and matches)
-- Profile modal management
 
 ### `login.js` & `signup.js`
 - Page-specific authentication logic
 
-### `index.html`, `login.html`, `signup.html`
+### `profile.js`
+- Profile management logic (loading data, saving updates, image handling)
+
+### `index.html`, `login.html`, `signup.html`, `profile.html`
 - Page markup and structures
 
 ## Privacy Considerations
