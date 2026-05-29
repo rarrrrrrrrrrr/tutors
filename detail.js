@@ -134,11 +134,6 @@ function renderDetail(profile, type) {
 
   details.appendChild(meta);
 
-  const topicsHeading = document.createElement('p');
-  topicsHeading.textContent = type === 'tutor' ? 'This tutor teaches:' : 'This student wants to learn:';
-  topicsHeading.style.fontWeight = '700';
-  details.appendChild(topicsHeading);
-
   if (type === 'tutor' && profile.schedule) {
     const scheduleHeading = document.createElement('p');
     scheduleHeading.textContent = 'Schedule:';
@@ -160,6 +155,11 @@ function renderDetail(profile, type) {
     lastLoginText.textContent = formatLastLogin(profile.lastLoginAt);
     details.appendChild(lastLoginText);
   }
+
+  const topicsHeading = document.createElement('p');
+  topicsHeading.textContent = type === 'tutor' ? 'This tutor teaches:' : 'This student wants to learn:';
+  topicsHeading.style.fontWeight = '700';
+  details.appendChild(topicsHeading);
 
   const list = document.createElement('ul');
   list.className = 'topics-list';
