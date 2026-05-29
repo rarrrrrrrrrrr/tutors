@@ -2,8 +2,7 @@ const studentSummary = document.getElementById('studentSummary');
 const studentFeed = document.getElementById('studentFeed');
 const tutorTableWrapper = document.getElementById('tutorTableWrapper');
 const tutorTableBody = document.getElementById('tutorTableBody');
-const loginTutorButton = document.getElementById('loginTutorButton');
-const loginStudentButton = document.getElementById('loginStudentButton');
+const loginButton = document.getElementById('loginButton');
 const signupButton = document.getElementById('signupButton');
 const profileButton = document.getElementById('profileButton');
 const logoutButton = document.getElementById('logoutButton');
@@ -32,8 +31,7 @@ function renderLoginState() {
     loginStatus.textContent = '';
     logoutButton.classList.add('hidden');
     profileButton.classList.add('hidden');
-    loginTutorButton.classList.remove('hidden');
-    loginStudentButton.classList.remove('hidden');
+    loginButton.classList.remove('hidden');
     signupButton.classList.remove('hidden');
     return;
   }
@@ -41,8 +39,7 @@ function renderLoginState() {
   loginStatus.textContent = `Logged in as ${user.role} • ${user.name}`;
   logoutButton.classList.remove('hidden');
   profileButton.classList.remove('hidden');
-  loginTutorButton.classList.add('hidden');
-  loginStudentButton.classList.add('hidden');
+  loginButton.classList.add('hidden');
   signupButton.classList.add('hidden');
 }
 
