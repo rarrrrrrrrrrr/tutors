@@ -199,10 +199,10 @@ async function renderMatches(profile, type) {
     return;
   }
 
-  matchHeading.textContent = 'Student matches are private';
-  matchDescription.textContent = 'Student profile data is private and not shown on tutor pages.';
-  matchList.innerHTML = '<div class="empty-state"><strong>Student matches are private.</strong><p>Only student owners can view their own tutor recommendations.</p></div>';
-  matchSection.style.display = 'block';
+  // If type is tutor, show matching students
+  const matches = students.filter(student => student.topics.some(topic => profile.topics.includes(topic)));
+  matchHeading.textContent = 'Matched students';
+  matchDescription.textContent = 'Students who want to learn one or more topics this tutor teaches.';
 
   if (!matches.length) {
     matchList.innerHTML = '<div class="empty-state"><strong>No matching students found.</strong><p>Add student profiles with related learning topics to see matches here.</p></div>';

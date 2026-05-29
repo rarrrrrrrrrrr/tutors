@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Matches - Learning Matchmaker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Personalized Recommendations</p>
+        <h1 id="matchPageHeading">My Matches</h1>
+        <p id="matchPageDescription">Loading your personalized matches...</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="preview-section">
+        <div id="matchList" class="profile-grid">
+          <div class="empty-state">Loading matches...</div>
+        </div>
+      </section>
+      <div class="form-actions">
+        <a href="index.html" class="secondary profile-link">Back to directory</a>
+      </div>
+    </main>
+  </div>
+
+  <script src="utils.js"></script>
+  <script src="matches.js"></script>
+</body>
+</html>
