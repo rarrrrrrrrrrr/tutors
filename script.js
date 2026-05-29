@@ -163,39 +163,44 @@ profileForm.addEventListener('submit', async function (event) {
   profile.school = profileSchoolInput.value.trim();
   profile.updatedAt = new Date().toISOString();
 
-  if (role === 'tutor') {
-    profile.topics = getCheckedTopics(profileForm, 'profileTopics');
-    profile.wage = profileWageInput.value.trim();
-    profile.schedule = profileTutorScheduleInput.value.trim();
-    profile.bio = profileTutorBioInput.value.trim();
-    const photoFile = profilePhotoInput.files[0];
-    profile.photo = photoFile ? await readImage(photoFile) : profile.photo || '';
-    await upsertProfile(STORAGE_TUTORS, profile);
-  } else {
-    profile.topics = getCheckedTopics(profileForm, 'profileStudentTopics');
-    await upsertProfile(STORAGE_STUDENTS, profile);
-  }
-
-  const newName = profileNameInput.value.trim();
-  if (newName !== user.name) {
-    try {
-      const updated = await apiFetch('/auth/update-name', {
-        method: 'POST',
-        body: JSON.stringify({ email: user.email, role: user.role, name: newName }),
-      });
-      if (updated) {
-        // We need a way to update the user in the session
-        sessionStorage.setItem('currentUser', JSON.stringify(updated));
-        renderLoginState();
-      }
-    } catch (err) {
-      console.error('Failed to update user name:', err);
+  try {
+    if (role === 'tutor') {
+      profile.topics = getCheckedTopics(profileForm, 'profileTopics');
+      profile.wage = profileWageInput.value.trim();
+      profile.schedule = profileTutorScheduleInput.value.trim();
+      profile.bio = profileTutorBioInput.value.trim();
+      const photoFile = profilePhotoInput.files[0];
+      profile.photo = photoFile ? await readImage(photoFile) : profile.photo || '';
+      await upsertProfile(STORAGE_TUTORS, profile);
+    } else {
+      profile.topics = getCheckedTopics(profileForm, 'profileStudentTopics');
+      await upsertProfile(STORAGE_STUDENTS, profile);
     }
-  }
 
-  profileMessage.textContent = 'Profile saved successfully.';
-  renderTutorTable();
-  setTimeout(closeProfile, 1200);
+    const newName = profileNameInput.value.trim();
+    if (newName !== user.name) {
+      try {
+        const updated = await apiFetch('/auth/update-name', {
+          method: 'POST',
+          body: JSON.stringify({ email: user.email, role: user.role, name: newName }),
+        });
+        if (updated) {
+          // We need a way to update the user in the session
+          sessionStorage.setItem('currentUser', JSON.stringify(updated));
+          renderLoginState();
+        }
+      } catch (err) {
+        console.error('Failed to update user name:', err);
+      }
+    }
+
+    profileMessage.textContent = 'Profile saved successfully.';
+    renderTutorTable();
+    setTimeout(closeProfile, 1200);
+  } catch (err) {
+    console.error('Profile save error:', err);
+    profileMessage.textContent = 'Failed to save profile. The image might be too large or there was a network error.';
+  }
 });
 
 // Initial load

@@ -126,12 +126,22 @@ loginForm.addEventListener('submit', async function (event) {
     return;
   }
 
-  const profileSaved = await saveSignupProfile(role, user, formData);
-  if (!profileSaved) {
-    loginMessage.textContent = 'Please complete the profile fields for your selected role.';
-    return;
-  }
+  try {
+    const profileSaved = await saveSignupProfile(role, user, formData);
+    if (!profileSaved) {
+      loginMessage.textContent = 'Please complete the profile fields for your selected role.';
+      return;
+    }
 
-  setCurrentUser(user);
-  window.location.href = 'index.html';
+    setCurrentUser(user);
+    window.location.href = 'index.html';
+  } catch (err) {
+    console.error('Signup profile save error:', err);
+    loginMessage.textContent = 'Account created, but failed to save profile details. Please try updating your profile from the home page.';
+    // Still set current user so they can log in/try again
+    setCurrentUser(user);
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 3000);
+  }
 });
